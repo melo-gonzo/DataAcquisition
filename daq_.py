@@ -7,7 +7,7 @@ import time
 
 class Daq:
     def __init__(self, samples=None, max_page_points=100000):
-        self.working_dir = 'C:\\Users\\gonzalesc\\Desktop\\'
+        self.working_dir = 'C:\\Users\\carme\\Desktop\\'
         self.samples = samples
         self.max_page_points = max_page_points
         self.channels = 16
