@@ -10,11 +10,19 @@ class Daq:
         self.working_dir = 'C:\\Users\\carme\\Desktop\\'
         self.samples = samples
         self.max_page_points = max_page_points
-        self.channels = 16
-        self.plot_channels = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+        # self.channels is always the number of lines printed in Arduino program, besides the
+        # counter and duration of collection. example, if you have two analog sensors in A0
+        # through A5, self.channels = 6
+        self.channels = 6
+        # self.plot_channels is always a list of lists. The number of sub-lists will be the
+        # number of subplots that you have. You can mix and match indicies, depending on what
+        # sensors you have going into each channel. Example: If you have accelerometers on
+        # channels 0, 1 and 2 - put those on one subplot. If you have pressure transducers on 3,
+        # 4, and 5 - put those on another subplot.
+        self.plot_channels = [[0, 1, 2], [3, 4, 5]]
+        # self.ranges is always a list of lists. It is the expected y-axis range for each subplot.
+        # This must always be the same size as self.plot_channels.
         self.ranges = [[0, 1050], [0, 1050]]
-        # self.plot_channels = [[1]]
-        # self.ranges = [[0,1050]]
         self.log_data = True
         self.data_file = []
         try:
@@ -27,7 +35,9 @@ class Daq:
             self.data_log = np.zeros((self.samples, 2 + self.channels))
 
     def open_data_file(self):
-        self.data_file = open(self.working_dir + 'test_logs' + str(np.round(time.time(), 2)) + '.txt', 'a+', newline='')
+        self.data_file = open(
+            self.working_dir + 'test_logs' + str(np.round(time.time(), 2)) + '.txt', 'a+',
+            newline='')
 
     def set_log_data(self, val):
         self.log_data = val
@@ -131,7 +141,8 @@ def read_collect_data(a, keepers, daq):
                     keepers.k = 0
             except Exception:
                 try:
-                    daq.data_log[old_k:, :] = np.array([n.split(',')[:] for n in data])[0:daq.samples - old_k]
+                    daq.data_log[old_k:, :] = np.array([n.split(',')[:] for n in data])[
+                                              0:daq.samples - old_k]
                 except Exception:
                     print('Data Write Error')
                     keepers.reset_keepers()
@@ -187,7 +198,7 @@ def make_plot(daq):
     total_plots = daq.total_plots
     if total_plots > 3:
         fig, ax = plt.subplots(total_plots // 2 + 1, 2)
-        fig.subplots_adjust(wspace=0.4,hspace=0.5)
+        fig.subplots_adjust(wspace=0.4, hspace=0.5)
     else:
         fig, ax = plt.subplots(total_plots, 1)
     ax = ax.reshape(-1, )[:total_plots + 1]
@@ -222,7 +233,8 @@ def draw_line(keepers, daq):
                     # keepers.ax[p].set_xlim([data[0, 1], data[k - 1, 1]])
                     keepers.ax[p].set_xlim([0, data[k - 1, 1]])
                 else:
-                    keepers.ax[p].set_xlim([data[data[:, 1] > (data[k - 1, 1] - 5000), 1][0], data[k - 1, 1]])
+                    keepers.ax[p].set_xlim(
+                        [data[data[:, 1] > (data[k - 1, 1] - 5000), 1][0], data[k - 1, 1]])
             except IndexError:
                 keepers.ax[p].set_xlim([0, data[-1, 1]])
             for idx, n in enumerate(pc[p]):
@@ -238,6 +250,11 @@ def draw_line(keepers, daq):
 
 ### Main
 if __name__ == '__main__':
-    daq = Daq()
+    # Inputs to Daq() are: Number of samples to collect, and number of points to save per text
+    # file. If you want to stream continuously and not save any information, dont give any
+    # arguments. To save 1000 points, with 100 points per page: Daq(1000, 100). To collect 1000
+    # points on the same text file, Daq(1000)
+    daq = Daq(1000)
+    # Select the correct com port.
     a = initalize_arduino('COM6')
     start_daq(a, daq)
