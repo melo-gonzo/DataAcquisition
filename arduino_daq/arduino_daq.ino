@@ -5,12 +5,12 @@ const int ai3 = A3;
 const int ai4 = A4;
 const int ai5 = A5;
 
-const int ai6 = A6;
-const int ai7 = A7;
-const int ai8 = A8;
-const int ai9 = A9;
-const int ai10 = A10;
-const int ai11 = A11;
+//const int ai6 = A6;
+//const int ai7 = A7;
+//const int ai8 = A8;
+//const int ai9 = A9;
+//const int ai10 = A10;
+//const int ai11 = A11;
 
 int sv0 = 0;
 int sv1 = 0;
