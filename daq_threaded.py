@@ -1,3 +1,4 @@
+from threading import Thread
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -79,9 +80,7 @@ def initalize_arduino(com, baud=115200):
     return a
 
 
-def start_daq(a, daq):
-    keepers = Keepers()
-    keepers.set_plot_object(make_plot(daq))
+def start_daq(a, daq, keepers):
     daq.set_log_data(True)
     daq.open_data_file()
     if daq.samples is None:
@@ -147,7 +146,7 @@ def read_collect_data(a, keepers, daq):
                     print('Data Write Error')
                     keepers.reset_keepers()
                     do_reset(a)
-            draw_line(keepers, daq)
+            # draw_line(keepers, daq)
     except UnicodeDecodeError:
         print('Decode Error')
     return keepers, daq
@@ -255,6 +254,13 @@ if __name__ == '__main__':
     # arguments. To save 1000 points, with 100 points per page: Daq(1000, 100). To collect 1000
     # points on the same text file, Daq(1000)
     daq = Daq(1000)
+    keepers = Keepers()
+    keepers.set_plot_object(make_plot(daq))
     # Select the correct com port.
     a = initalize_arduino('/dev/ttyACM0')
-    start_daq(a, daq)
+    daq_thread = Thread(target=start_daq, args=(a, daq, keepers,))
+    plot_thread = Thread(target=draw_line, args=(keepers, daq,))
+    daq_thread.start()
+    plot_thread.start()
+
+
